@@ -1,0 +1,84 @@
+<odoo>
+  <data>
+    <!-- <record
+      model="ir.ui.view"
+      id="costpocket_tree">
+      <field name="name">costpocket list</field>
+      <field name="model">cp.expense</field>
+      <field name="arch" type="xml">
+        <tree>
+          <field name="name"/>
+        </tree>
+      </field>
+    </record>
+
+    <record
+      id="action_cp_expenses"
+      model="ir.actions.act_window">
+        <field name="name">CostPocket expenses</field>
+        <field name="res_model">cp.expense</field>
+        <field name="view_mode">tree</field>
+        <field name="domain">[]</field>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+              Nothing interesting happens.
+            </p>
+        </field>
+    </record>
+
+    <menuitem 
+      id="cp_expense"
+      name="CostPocket Expenses"
+      sequence="1"
+      web_icon="costpocket,static/description/icon.png"/>
+
+    <menuitem 
+      id="my_cp_expenses"
+      name="My CostPocket Expenses"
+      sequence="1"
+      parent="cp_expense"
+      groups="base.group_user"/>
+
+    <menuitem
+      id="menu_my_cp_expenses"
+      name="Expenses"
+      sequence="1"
+      parent="my_cp_expenses"
+      action="action_cp_expenses"
+      groups="base.group_user"/>
+
+    <menuitem
+      id="menu_my_cp_reports"
+      name="Reports"
+      sequence="2"
+      parent="my_cp_expenses"
+      action="action_cp_expenses"
+      groups="base.group_user"/>
+
+    <record id="my_cp_expenses_tree" model="ir.ui.view">
+      <field name="name">cp.expense_tree</field>
+      <field name="model">cp.expense</field>
+      <field name="arch" type="xml">
+        <tree string="help">
+          <field name="name"/>
+        </tree>
+      </field>
+    </record>
+
+    <record id="my_cp_expenses" model="ir.actions.act_window">
+        <field name="name">CostPocket Expenses</field>
+        <field name="res_model">cp.expense</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[]</field>
+        <field name="context">{}</field>
+        <field name="view_id" ref="my_cp_expenses_tree"/>
+    </record>
+
+    <menuitem
+      id="menu_cp_expense_configuration"
+      name="Configuration"
+      parent="cp_expense"
+      sequence="100"/> -->
+  </data>
+</odoo>
