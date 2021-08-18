@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+      <field name="name">res.config.settings.view.form.inherit.account</field>
+      <field name="model">res.config.settings</field>
+      <field name="priority" eval="85"/>
+      <field name="inherit_id" ref="account.res_config_settings_view_form"/>
+      <field name="arch" type="xml">
+        <xpath expr="//div[@data-key='account']" position="inside">
+          <h2>CostPocket</h2>
+          <div class="row mt16 o_settings_container" name="costpocket_expenses_settings_container">
+            <div class="col-12 col-lg-6 o_setting_box" id="costpocket_activation">
+              <div class="o_setting_left_pane">
+                <field name="costpocket_api_is_active"/>
+              </div>
+              <div class="o_setting_right_pane">
+                <label for="costpocket_api_is_active" string="Use CostPocket expenses"/>
+                <div class="text-muted">
+                  With Costpocket app you can make a photo from the receipt, digitize them and it will be automatically sent to the XXX. Each company has its own unique email address to forward invoices from your email. You do not have to enter it manually. When activating, we will send you further instructions.
+                </div>
+                <div class="content-group mt16 mb16">
+                  <div class="row">
+                    <label class="col-lg-3 o_light_label" string="API Token" for="costpocket_api_token"/>
+                    <field name="costpocket_api_token" class="oe_inline"/>
+                  </div>
+                  <div class="row">
+                    <label class="col-lg-3 o_light_label" string="API BCX" for="costpocket_api_bcx"/>
+                    <field name="costpocket_api_bcx" class="oe_inline"/>
+                  </div>
+                  <div class="row">
+                    <label class="col-lg-3 o_light_label" string="API ID" for="costpocket_api_id"/>
+                    <field name="costpocket_api_id" class="oe_inline"/>
+                  </div>
+                  <div class="row">
+                    <label class="col-lg-3 o_light_label" string="Email" for="costpocket_api_email"/>
+                    <field name="costpocket_api_email" class="oe_inline"/>
+                  </div>
+                  <div class="row">
+                    <label class="col-lg-3 o_light_label" string="Company name" for="company_name"/>
+                    <field name="company_name" class="oe_inline"/>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </xpath>
+      </field>
+    </record>
+  </data>
+</odoo>
