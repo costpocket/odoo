@@ -26,14 +26,6 @@ class ResConfigSettings(models.TransientModel):
   costpocket_api_bcx = fields.Char(string='CostPocket API bcx')
   costpocket_api_id = fields.Char(string='CostPocket API id')
 
-  @api.onchange('costpocket_api_is_active')
-  def onchange_is_active(self):
-    if self.costpocket_api_is_active:
-      self._activate_cp()
-
-    elif not self.costpocket_api_is_active:
-      self._deactivate_cp()
-
   def _activate_cp(self):
     try:
       partner_id = self.env.user.partner_id
@@ -145,7 +137,7 @@ class ResConfigSettings(models.TransientModel):
 
 
   def set_values(self):
-    super(ResConfigSettings, self).set_values()
+    res = super(ResConfigSettings, self).set_values()
     set_param = self.env['ir.config_parameter'].sudo().set_param
 
     set_param('costpocket_api_is_active', self.costpocket_api_is_active)
@@ -153,3 +145,11 @@ class ResConfigSettings(models.TransientModel):
     set_param('costpocket_api_email', self.costpocket_api_email)
     set_param('costpocket_api_bcx', self.costpocket_api_bcx)
     set_param('costpocket_api_id', self.costpocket_api_id)
+
+    if self.costpocket_api_is_active:
+      self._activate_cp()
+
+    elif not self.costpocket_api_is_active:
+      self._deactivate_cp()
+
+    return res
