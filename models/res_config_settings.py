@@ -43,7 +43,7 @@ class ResConfigSettings(models.TransientModel):
       lastname = name_formatted[1] if len(name_formatted) == 2 else firstname
       parameters = self.env['ir.config_parameter'].sudo()
 
-      bcx = parameters.get_param('costpocket_api_bcx') if parameters.get_param('costpocket_api_bcx') else genBCX()
+      bcx = self.costpocket_api_bcx or genBCX()
 
       company_data = {
         "user":{
@@ -73,7 +73,7 @@ class ResConfigSettings(models.TransientModel):
         url = request_url,
         json = company_data,
         timeout = CP_API_TIMEOUT,
-        headers = {'Environment': 'dev'}
+        headers = {'Environment': 'pro'}
       )
 
       active_request.raise_for_status()
@@ -119,8 +119,9 @@ class ResConfigSettings(models.TransientModel):
 
     set_param('costpocket_api_is_active', False)
     set_param('costpocket_api_token', False)
-    set_param('costpocket_api_id', False)
     set_param('costpocket_api_email', False)
+    set_param('costpocket_api_bcx', False)
+    set_param('costpocket_api_id', False)
 
     _logger.info(f'CostPocket Deactivated')
 

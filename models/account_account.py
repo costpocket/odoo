@@ -16,6 +16,7 @@ class CostPocketAccount(models.Model):
   _inherit = 'account.move'
   
   cp_id = fields.Integer(string='CostPocket id')
+  cp_company_paid = fields.Boolean(string='Paid by company')
 
 
 class CostPocketAccount(models.Model):
@@ -64,24 +65,42 @@ class CostPocketAccount(models.Model):
             ('user_type_id', '=', self.env.ref('account.data_account_type_expenses').id)
           ], limit=1)
 
+          partner_id = self.env.user.partner_id
+          cp_company_paid = False
+
+          if document['metadata']['billingType'] == 'company':
+            cp_company_paid = True
+
+            if document['supplier']['regCode'] or document['supplier']['VATNumber']:
+              partner_id = self.env['res.partner'].search([
+                ['vat', '=', document['supplier']['VATNumber']]
+              ], limit=1)
+
+              if not partner_id:
+                partner_id = self.env['res.partner'].sudo().create({
+                  'name': document['supplier']['name'],
+                  'vat': document['supplier']['VATNumber'],
+                })
+
           document_payload = {
-            'partner_id': self.env.user.partner_id.id,
+            'cp_company_paid': cp_company_paid,
+            'partner_id': partner_id.id,
             'cp_id': document['id'],
             'move_type': 'in_invoice',
             'date': document['createdAt'],
+            'invoice_date': document['createdAt'],
             'currency_id': currency_id.id,
-            'line_ids': [],
+            'date': document['information']['issued'],
+            'invoice_line_ids': []
           }
 
           for row in document['itemRows']:
-            document_payload['line_ids'] += [(0, None, {
+            document_payload['invoice_line_ids'] += [(0, None, {
               'quantity': row['quantity'],
               'name': row['description'] or '----',
               'price_unit': row['price'],
               'currency_id': currency_id.id,
-              'account_id': account_id.id,
-              'credit': 0.0,
-              'debit': 0.0
+              'account_id': account_id.id
             })]
 
           account_move = self.env['account.move'].sudo().with_context(check_move_validity=False).create(document_payload)
@@ -94,7 +113,7 @@ class CostPocketAccount(models.Model):
 
         if len(response) == 0:
           _logger.info('No new documents found')
-        
+
         else:
           success_json = json.dumps(success_ids)
 
