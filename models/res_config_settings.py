@@ -26,6 +26,11 @@ class ResConfigSettings(models.TransientModel):
   costpocket_api_bcx = fields.Char(string='CostPocket API bcx')
   costpocket_api_id = fields.Char(string='CostPocket API id')
 
+  costpocket_tax_ids = fields.Many2many(
+    related='company_id.costpocket_tax_ids',
+    readonly=False,
+  )
+
   def _activate_cp(self):
     try:
       partner_id = self.env.user.partner_id

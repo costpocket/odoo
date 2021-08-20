@@ -20,6 +20,16 @@
                   With Costpocket app you can make a photo from the receipt, digitize them and it will be automatically sent to the XXX. Each company has its own unique email address to forward invoices from your email. You do not have to enter it manually. When activating, we will send you further instructions.
                 </div>
                 <div class="content-group mt16 mb16">
+                  <field
+                    name="costpocket_tax_ids"
+                    options="{'no_create': True}"
+                    widget="many2many_tags"
+                    domain="[
+                      ('company_id', '=', company_id),
+                      ('type_tax_use', '=', 'purchase'),
+                      ('amount_type', '=', 'percent'),
+                      ('price_include', '=', False)
+                    ]"/>
                   <div class="row">
                     <label class="col-lg-3 o_light_label" string="API Token" for="costpocket_api_token"/>
                     <field name="costpocket_api_token" class="oe_inline"/>

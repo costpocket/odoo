@@ -2,6 +2,7 @@
 import logging
 import requests
 import json
+import base64
 
 from odoo import fields, models, api, _, _lt
 from odoo.exceptions import UserError
@@ -18,9 +19,29 @@ class CostPocketAccount(models.Model):
   cp_id = fields.Integer(string='CostPocket id')
   cp_company_paid = fields.Boolean(string='Paid by company')
 
+  # finvoice_filename = fields.Char(
+  #     'finvoice filename', compute='_compute_finvoice_filename')
 
 class CostPocketAccount(models.Model):
   _inherit = 'account.account'
+
+  # def _get_finvoice_taxes(self):
+  #   self.ensure_one()
+  #   tax_codes = self.env['account.tax']
+
+  #   if self.finvoice_vat_rate_percent:
+  #       domain = self.company_id._incoming_finvoice_tax_domain()
+  #       domain.append(('amount', '=', float(self.finvoice_vat_rate_percent)))
+  #       tax_codes = tax_codes.search(domain)
+  #       # Try to use default tax code
+  #       def_tax_code = tax_codes.filtered(
+  #           lambda tax: tax in self.company_id.incoming_finvoice_tax_ids)
+  #       if def_tax_code:
+  #           return def_tax_code[0]
+  #       if tax_codes:
+  #           return tax_codes[0]
+
+  #   return tax_codes
 
   @api.model
   def _fetch_costpocket_expenses(self):
@@ -81,6 +102,11 @@ class CostPocketAccount(models.Model):
                   'name': document['supplier']['name'],
                   'vat': document['supplier']['VATNumber'],
                 })
+          
+          else:
+            partner_id = self.env['res.partner'].search([
+              ['vat', '=', document['submitter']['email']]
+            ], limit=1)
 
           document_payload = {
             'cp_company_paid': cp_company_paid,
@@ -95,15 +121,48 @@ class CostPocketAccount(models.Model):
           }
 
           for row in document['itemRows']:
+            tax_id = None
+
+            tax_ids = self.env['account.tax'].search([
+              ('company_id', '=', self.env.user.company_id.id),
+              ('type_tax_use', '=', 'purchase'),
+              ('amount_type', '=', 'percent'),
+              ('price_include', '=', False),
+              ('amount', '=', float(row['VATrate']))
+            ])
+
+            cp_tax_ids = tax_ids.filtered(lambda tax: tax in self.env.user.company_id.costpocket_tax_ids)
+
+            if cp_tax_ids:
+              tax_id = cp_tax_ids[0]
+
+            elif tax_ids:
+              tax_id = tax_ids[0]
+
             document_payload['invoice_line_ids'] += [(0, None, {
               'quantity': row['quantity'],
               'name': row['description'] or '----',
               'price_unit': row['price'],
               'currency_id': currency_id.id,
-              'account_id': account_id.id
+              'account_id': account_id.id,
+              'tax_ids': tax_id
             })]
 
           account_move = self.env['account.move'].sudo().with_context(check_move_validity=False).create(document_payload)
+
+          if document['metadata']['billingType'] == 'company':
+            account_move.line_ids.reconcile()
+
+          if document['attachment']:
+            base64_img_bytes = document['attachment']['content'].encode('utf-8')
+
+            self.env['ir.attachment'].sudo().create({
+                'name': document['attachment']['name'],
+                'res_model': account_move._name,
+                'res_id': account_move.id,
+                'datas': base64.b64encode(base64_img_bytes),
+                'type': 'binary',
+            })
 
           success_ids += [{
             'documentId': document['id'],
